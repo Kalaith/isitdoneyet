@@ -454,8 +454,6 @@ function openTaskModal(taskId) {
     markCompleteBtn.textContent = 'Yes, it\'s done!';
     markCompleteBtn.disabled = false;
     
-    // Always show the question unless explicitly completed
-    // This ensures that even 100% progress tasks still ask "Is it done yet?"
     if (task.completed) {
         taskQuestion.style.display = 'none';
     } else {

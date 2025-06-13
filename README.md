@@ -1,59 +1,28 @@
-# Is It Done Yet? - Frontend
+# Is It Done Yet?
 
 A recursive project management application that helps you break down complex tasks into manageable subtasks until completion.
 
-## 🚀 Quick Start
+## 🌐 Live Application
 
-### Option 1: PowerShell (Recommended)
-```powershell
-.\start-frontend.ps1
-```
+**Production Site**: https://webhatchery.au/isitdoneyet/
+**Backend API**: https://webhatchery.au/isitdoneyet/backend/public/api
 
-### Option 2: Batch File
-```cmd
-start-frontend.bat
-```
-
-### Option 3: Manual Commands
-
-**With Node.js:**
-```powershell
-node server.js
-```
-
-**With Python:**
-```powershell
-python -m http.server 3000
-```
-
-**With PHP:**
-```powershell
-php -S localhost:3000
-```
-
-## 📦 Package Manager Setup
-
-If you have Node.js installed, you can also use npm:
-
-```powershell
-# Install dependencies (optional)
-npm install
-
-# Start frontend server
-npm start
-
-# Start both frontend and backend
-npm run full-stack
-```
+The application is currently hosted on Apache at webhatchery.au and ready for use!
 
 ## 🌐 Access
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001/api (must be running separately)
+- **Application**: https://webhatchery.au/isitdoneyet/
+- **Backend API**: https://webhatchery.au/isitdoneyet/backend/public/api
 
 ## 🏗️ Architecture
 
-The frontend is a vanilla JavaScript application that communicates with a PHP backend API:
+The application is a vanilla JavaScript frontend that communicates with a PHP backend API. 
+
+### Production Deployment
+- **Server**: Apache on webhatchery.au
+- **Frontend**: Static files served directly by Apache
+- **Backend**: PHP application with Slim framework
+- **Database**: MySQL/MariaDB with persistent storage
 
 ### Files Structure
 ```
@@ -62,10 +31,10 @@ isitdoneyet/
 ├── app.js              # Application logic
 ├── api-service.js      # API communication layer
 ├── style.css           # Styling
-├── server.js           # Node.js development server
-├── start-frontend.ps1  # PowerShell startup script
-├── start-frontend.bat  # Batch startup script
-└── package.json        # Node.js configuration
+└── backend/            # PHP backend application
+    ├── public/         # Web-accessible files
+    ├── src/            # Application source code
+    └── vendor/         # Composer dependencies
 ```
 
 ### Key Components
@@ -76,13 +45,7 @@ isitdoneyet/
 
 ## 🔌 Backend Integration
 
-The frontend expects the backend API to be running on `http://localhost:3001/api`. 
-
-To start the backend:
-```powershell
-cd backend
-composer start
-```
+The frontend communicates with the backend API at `https://webhatchery.au/isitdoneyet/backend/public/api`.
 
 ### API Endpoints Used
 
@@ -102,18 +65,25 @@ composer start
 - **Real-time Updates**: Changes are immediately saved to the backend
 - **Intuitive UI**: Modal-based task details with simple yes/no completion flow
 
+## 🚀 Deployment
+
+The application is currently deployed on Apache at webhatchery.au. For deployment details and configuration, see `APACHE-DEPLOYMENT.md` and `DEPLOYMENT.md`.
+
+### Production Environment
+- **Server**: Apache with mod_rewrite enabled
+- **PHP**: Version 8.0+ with required extensions
+- **Database**: MySQL/MariaDB with proper schema
+- **SSL**: HTTPS enabled with valid certificate
+
 ## 🛠️ Development
 
-### Hot Reloading
-The development servers support hot reloading - just save your files and refresh the browser.
-
 ### CORS Configuration
-The frontend includes CORS headers for development. The backend should also be configured with appropriate CORS settings.
+CORS is configured for the webhatchery.au domain to allow secure API communication.
 
 ### Error Handling
 - API errors are logged to the browser console
 - User-friendly error messages for network issues
-- Fallback to local storage if backend is unavailable
+- Graceful fallback behavior for offline usage
 
 ## 🎨 Customization
 
@@ -130,11 +100,13 @@ Edit `style.css` to customize the appearance. The design uses CSS custom propert
 ```
 
 ### API Configuration
-Update the base URL in `api-service.js` if your backend runs on a different port:
+The application uses the production API at `https://webhatchery.au/isitdoneyet/backend/public/api`.
+
+To customize the API URL, update the base URL in `api-service.js`:
 
 ```javascript
 constructor() {
-    this.baseURL = 'http://localhost:3001/api';
+    this.baseURL = 'https://webhatchery.au/isitdoneyet/backend/public/api';
 }
 ```
 
@@ -148,20 +120,17 @@ constructor() {
 
 ## 🐛 Troubleshooting
 
-### Frontend Won't Start
-- Ensure you have Node.js, Python, or PHP installed
-- Check if port 3000 is already in use
-- Try running the manual commands
-
-### Can't Connect to Backend
-- Verify backend is running on port 3001
-- Check CORS configuration
-- Ensure database is initialized
+If you encounter issues with the application:
+- Check the browser console for errors
+- Verify your internet connection
+- Try clearing browser cache and cookies
+- Ensure webhatchery.au is accessible
+- Report persistent issues via the project repository
 
 ### Data Not Persisting
-- Confirm backend API is accessible
+- Data is automatically saved to the live database
 - Check browser console for API errors
-- Verify database connection in backend
+- Verify the backend API is responding correctly
 
 ## 📄 License
 
