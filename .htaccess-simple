@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# Test direct file access first - these should work without rewrite
+# /api/status.php
+# /api/simple-test.php  
+# /api/error-check.php
+
+# Handle API routes - try simplified API first
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/simple-api.php?path=$1 [QSA,L]
+
+# Handle frontend routes - serve index.html for any non-api request
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^(.*)$ index.html [QSA,L]
+
+# Set proper MIME types
+AddType application/javascript .js
+AddType text/css .css
+
+# Enable error logging for debugging
+# php_flag log_errors on
+# php_value error_log /path/to/error.log

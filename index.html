@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Is It Done Yet? - Recursive Project Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Is It Done Yet?</h1>
+            <p class="header__subtitle">Break down your projects recursively until they're complete</p>
+        </header>
+
+        <main class="main">
+            <!-- Project Creation Form -->
+            <div class="project-form-container" id="projectFormContainer">
+                <div class="card">
+                    <div class="card__body">
+                        <h2>Create New Project</h2>
+                        <form id="projectForm" class="project-form">
+                            <div class="form-group">
+                                <label for="projectTitle" class="form-label">Project Title</label>
+                                <input type="text" id="projectTitle" class="form-control" placeholder="Enter project title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="projectDescription" class="form-label">Description (Optional)</label>
+                                <textarea id="projectDescription" class="form-control" rows="3" placeholder="Describe your project"></textarea>
+                            </div>
+                            <div class="flex gap-8">
+                                <button type="submit" class="btn btn--primary">Create Project</button>
+                                <button type="button" class="btn btn--secondary" id="cancelProjectBtn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects List -->
+            <div class="projects-section">
+                <div class="projects-header flex justify-between items-center">
+                    <h2>Your Projects</h2>
+                    <button class="btn btn--primary" id="newProjectBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        New Project
+                    </button>
+                </div>
+
+                <div class="projects-list" id="projectsList">
+                    <!-- Projects will be rendered here -->
+                </div>
+
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state__icon">📋</div>
+                    <h3>No projects yet</h3>
+                    <p>Create your first project to get started with recursive task management</p>
+                    <button class="btn btn--primary" id="emptyStateBtn">Create First Project</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Task Detail Modal -->
+        <div class="modal-overlay" id="taskModal">
+            <div class="modal">
+                <div class="modal__header">
+                    <h3 id="taskModalTitle">Task Details</h3>
+                    <button class="modal__close" id="closeTaskModal">&times;</button>
+                </div>
+                <div class="modal__body">
+                    <div class="task-question">
+                        <h2>Is it done yet?</h2>
+                        <div class="task-actions">
+                            <button class="btn btn--primary btn--lg" id="markCompleteBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                Yes, it's done!
+                            </button>
+                            <button class="btn btn--secondary btn--lg" id="addSubtaskBtn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                No, add subtask
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="subtask-form" id="subtaskForm" style="display: none;">
+                        <h3>What needs to be done?</h3>
+                        <div class="form-group">
+                            <input type="text" id="subtaskTitle" class="form-control" placeholder="Enter subtask description" required>
+                        </div>
+                        <div class="flex gap-8">
+                            <button class="btn btn--primary" id="addSubtaskSubmit">Add Subtask</button>
+                            <button class="btn btn--outline" id="cancelSubtask">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div class="task-progress" id="taskProgress">
+                        <!-- Progress information will be displayed here -->
+                    </div>
+
+                    <div class="subtasks-list" id="subtasksList">
+                        <!-- Subtasks will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>    </div>
+
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

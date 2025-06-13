@@ -1,0 +1,190 @@
+{
+  "mcpServers": {
+    "isitdoneyet": {
+      "command": "node",
+      "args": ["mcp-server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "PROJECT_ROOT": "e:\\WebHatchery\\isitdoneyet",
+        "API_BASE_URL": "http://localhost:3001",
+        "FRONTEND_URL": "http://localhost:3000"
+      }
+    }
+  },
+  "project": {
+    "name": "Is It Done Yet?",
+    "description": "Recursive project management application with hierarchical task tracking",
+    "version": "1.0.0",
+    "type": "fullstack-web-app",
+    "technologies": {
+      "frontend": ["HTML", "CSS", "JavaScript", "Vanilla JS"],
+      "backend": ["PHP", "Slim Framework", "Eloquent ORM"],
+      "database": ["MySQL"],
+      "tools": ["Composer", "npm", "PowerShell"]
+    },
+    "structure": {
+      "frontend": {
+        "path": "./",
+        "entryPoint": "index.html",
+        "server": "server.js",
+        "port": 3000,
+        "scripts": {
+          "start": "node server.js",
+          "dev": "node server.js"
+        }
+      },
+      "backend": {
+        "path": "./backend",
+        "entryPoint": "public/index.php",
+        "port": 8080,
+        "framework": "Slim 4",
+        "orm": "Eloquent",
+        "scripts": {
+          "start": "php -S localhost:8080 -t public",
+          "init-db": "php scripts/initialize-database.php"
+        }
+      }
+    },
+    "features": {
+      "core": [
+        "Hierarchical task management",
+        "Unlimited task nesting",
+        "Progress calculation",
+        "Task completion propagation",
+        "CRUD operations for projects"
+      ],
+      "api": [
+        "RESTful API endpoints",
+        "CORS support",
+        "Error handling",
+        "Logging",
+        "JSON responses"
+      ],
+      "frontend": [
+        "Responsive design",
+        "Dynamic task creation",
+        "Progress visualization",
+        "Real-time updates",
+        "Hierarchical display"
+      ]
+    },
+    "database": {
+      "type": "MySQL",
+      "tables": {
+        "projects": {
+          "columns": [
+            "id (primary key)",
+            "title (varchar)",
+            "description (text)",
+            "completed (boolean)",
+            "parent_id (foreign key, nullable)",
+            "created_at (timestamp)",
+            "updated_at (timestamp)"
+          ],
+          "relationships": {
+            "self-referencing": "parent_id references projects.id"
+          }
+        }
+      }
+    },
+    "api": {
+      "baseUrl": "http://localhost:8080/api",
+      "endpoints": {
+        "GET /": "API status and information",
+        "GET /projects": "Get all root projects with hierarchies",
+        "GET /projects/{id}": "Get specific project with hierarchy",
+        "POST /projects": "Create new project",
+        "PUT /projects/{id}": "Update project",
+        "DELETE /projects/{id}": "Delete project and children",
+        "POST /projects/{id}/complete": "Mark project complete",
+        "POST /projects/{id}/subtasks": "Add subtask to project"
+      }
+    },
+    "architecture": {
+      "backend": {
+        "pattern": "Actions-Controllers-Models",
+        "layers": [
+          "Controllers (HTTP request handling)",
+          "Actions (Business logic)",
+          "Models (Data access)",
+          "External (Database service)"
+        ],
+        "middleware": [
+          "CORS",
+          "Error handling",
+          "Content type",
+          "Logging"
+        ]
+      },
+      "frontend": {
+        "pattern": "Module-based architecture",
+        "components": [
+          "API service layer",
+          "DOM manipulation",
+          "Event handling",
+          "State management"
+        ]
+      }
+    },
+    "setup": {
+      "requirements": {
+        "php": ">=8.0",
+        "composer": ">=2.0",
+        "mysql": ">=8.0",
+        "node": ">=16.0"
+      },
+      "installation": [
+        "1. Clone repository",
+        "2. Backend setup: cd backend && composer install",
+        "3. Frontend setup: npm install",
+        "4. Configure .env file with database credentials",
+        "5. Initialize database: php scripts/initialize-database.php",
+        "6. Start backend: php -S localhost:8080 -t public",
+        "7. Start frontend: node server.js"
+      ]
+    },
+    "development": {
+      "startup": {
+        "backend": "start-backend.ps1 or start-backend.bat",
+        "frontend": "start-frontend.ps1 or start-frontend.bat"
+      },
+      "debugging": {
+        "logs": "backend/storage/logs/",
+        "browser": "Developer tools console",
+        "api": "test-backend.html for API testing"
+      }
+    },
+    "current_status": {
+      "completed": [
+        "✅ Backend API implementation",
+        "✅ Database schema and models",
+        "✅ Frontend-backend integration",
+        "✅ CRUD operations",
+        "✅ Hierarchical relationships",
+        "✅ Progress calculation",
+        "✅ Error handling and logging",
+        "✅ CORS configuration",
+        "✅ Startup scripts"
+      ],
+      "in_progress": [
+        "🔄 Fixing subtask display after creation",
+        "🔄 Recursive relationship loading optimization"
+      ],
+      "pending": [
+        "❌ Full frontend-backend integration testing",
+        "❌ UI/UX improvements",
+        "❌ Performance optimization",
+        "❌ Error handling enhancement",
+        "❌ Documentation completion"
+      ]
+    },
+    "known_issues": [
+      {
+        "issue": "Subtasks not displaying after creation",
+        "status": "investigating",
+        "description": "Subtasks are created in database but not showing in frontend after refresh",
+        "location": "ProjectActions.php formatProjectWithProgress method"
+      }
+    ]
+  }
+}

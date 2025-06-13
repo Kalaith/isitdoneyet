@@ -1,0 +1,32 @@
+{
+  "name": "isitdoneyet-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Is It Done Yet? - Recursive Project Management",
+  "main": "index.html",  "scripts": {
+    "start": "python -m http.server 3000",
+    "start-alt": "php -S localhost:3000",
+    "dev": "python -m http.server 3000",
+    "backend": "cd backend && composer start",
+    "full-stack": "concurrently \"npm run backend\" \"npm run start\"",
+    "mcp": "node mcp-server.js",
+    "mcp:status": "node mcp-server.js status",
+    "mcp:health": "node mcp-server.js health",
+    "mcp:start": "node mcp-server.js start"
+  },
+  "keywords": [
+    "project-management",
+    "tasks",
+    "productivity",
+    "recursive"
+  ],
+  "author": "WebHatchery",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "homepage": "http://localhost:3000"
+}
