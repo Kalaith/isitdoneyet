@@ -14,16 +14,29 @@ A PHP backend for the "Is It Done Yet?" recursive project management application
 ## API Endpoints
 
 ### Projects
-- `GET /api/projects` - Get all projects
-- `GET /api/projects/{id}` - Get project by ID
-- `POST /api/projects` - Create new project
-- `PUT /api/projects/{id}` - Update project
-- `DELETE /api/projects/{id}` - Delete project
-- `POST /api/projects/{id}/complete` - Mark project complete
-- `POST /api/projects/{id}/subtasks` - Add subtask to project
+- `GET /api/v1/projects` - Get all projects
+- `GET /api/v1/projects/{id}` - Get project by ID
+- `POST /api/v1/projects` - Create new project
+- `PUT /api/v1/projects/{id}` - Update project
+- `DELETE /api/v1/projects/{id}` - Delete project
+- `POST /api/v1/projects/{id}/complete` - Mark project complete
+- `POST /api/v1/projects/{id}/subtasks` - Add subtask to project
+
+Compatibility routes (still available):
+
+- `GET /api/projects`
+- `GET /api/projects/{id}`
+- `POST /api/projects`
+- `PUT /api/projects/{id}`
+- `DELETE /api/projects/{id}`
+- `POST /api/projects/{id}/complete`
+- `POST /api/projects/{id}/subtasks`
 
 ### System
-- `GET /api/status` - API status and endpoints
+- `GET /api/v1/health` - Versioned health endpoint
+- `GET /health` - Root health endpoint
+- `GET /api/v1/status` - Versioned status endpoint
+- `GET /api/status` - Legacy status endpoint
 
 ## Quick Start
 
@@ -105,7 +118,7 @@ Update your frontend's API base URL to point to the backend:
 
 ```javascript
 // In your frontend app.js or config
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = 'http://localhost:3001/api/v1';
 ```
 
 ## Development
@@ -126,8 +139,13 @@ composer cs-fix      # Fix code formatting
 ## Environment Variables
 
 ```env
+# Application Configuration
+APP_ENV=development
+APP_BASE_PATH=/isitdoneyet
+
 # Database Configuration
 DB_HOST=localhost
+DB_PORT=3306
 DB_NAME=isitdoneyet
 DB_USER=root
 DB_PASSWORD=
@@ -138,4 +156,18 @@ DEBUG=true
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
+
+# API Configuration
+API_PREFIX=/api
+API_VERSION=v1
+
+# Security
+JWT_SECRET=replace_with_long_random_secret
+JWT_EXPIRY=86400
 ```
+
+## Bootstrap Notes
+
+- `public/index.php` supports both versioned (`/api/v1/*`) and legacy (`/api/*`) routes.
+- Health/status endpoints are intentionally lightweight and can respond without database connectivity.
+- Autoloading prefers the central WebHatchery `vendor` folder with a local fallback.

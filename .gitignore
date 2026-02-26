@@ -121,7 +121,6 @@ logs/
 mcp
 mcp-*.log
 node_modules/
-package-lock.json
 phpunit.xml
 pids
 public

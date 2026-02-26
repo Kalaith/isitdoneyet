@@ -1,0 +1,136 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #102a43;
+  background: linear-gradient(180deg, #f0f4f8 0%, #d9e2ec 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.app-shell {
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 2rem 1rem 3rem;
+}
+
+.app-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(16, 42, 67, 0.15);
+  padding: 1.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.meta {
+  color: #486581;
+  font-size: 0.9rem;
+}
+
+.create-form {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1.2rem 0 1rem;
+}
+
+input,
+button {
+  border: 1px solid #bcccdc;
+  border-radius: 8px;
+  font: inherit;
+  padding: 0.65rem 0.8rem;
+}
+
+button {
+  background: #243b53;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button.danger {
+  background: #b42318;
+}
+
+.error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.status {
+  color: #486581;
+}
+
+.project-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-node {
+  margin-bottom: 1rem;
+}
+
+.project-card {
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+
+.project-card.is-complete {
+  background: #e3f9e5;
+  border-color: #57ae5b;
+}
+
+.project-header {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.project-header h3 {
+  margin: 0;
+}
+
+.project-progress {
+  color: #334e68;
+  font-size: 0.85rem;
+}
+
+.project-description {
+  margin: 0.5rem 0;
+}
+
+.project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.project-actions button {
+  padding: 0.4rem 0.7rem;
+}
+
+.subtask-form {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+}
+
+.children {
+  margin-top: 0.7rem;
+}
