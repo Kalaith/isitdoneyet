@@ -137,3 +137,5 @@ tmp/
 uploads/
 vendor/
 yarn.lock
+
+**/.env*
