@@ -42,7 +42,7 @@ Compatibility routes (still available):
 
 1. **Install Dependencies**
    ```bash
-   composer install
+   composer install --working-dir=../../..
    ```
 
 2. **Environment Setup**
