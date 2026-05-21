@@ -139,3 +139,10 @@ vendor/
 yarn.lock
 
 **/.env*
+!backend/.env.example
+!frontend/.env.example
+!frontend/.env.preview
+!backend/public/
+!backend/public/.htaccess
+!backend/public/index.php
+!backend/phpunit.xml

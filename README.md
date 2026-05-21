@@ -1,137 +1,104 @@
 # Is It Done Yet?
 
-A recursive project management application that helps you break down complex tasks into manageable subtasks until completion.
+Recursive project tracking for WebHatchery users. The app is a React 19/Vite frontend with a PHP backend that stores private, owner-scoped project trees.
 
-## 🌐 Live Application
+## Architecture
 
-**Production Site**: https://webhatchery.au/isitdoneyet/
-**Backend API**: https://webhatchery.au/isitdoneyet/backend/public/api
-
-The application is currently hosted on Apache at webhatchery.au and ready for use!
-
-## 🌐 Access
-
-- **Application**: https://webhatchery.au/isitdoneyet/
-- **Backend API**: https://webhatchery.au/isitdoneyet/backend/public/api
-
-## 🏗️ Architecture
-
-The application is a vanilla JavaScript frontend that communicates with a PHP backend API. 
-
-### Production Deployment
-- **Server**: Apache on webhatchery.au
-- **Frontend**: Static files served directly by Apache
-- **Backend**: PHP application with Slim framework
-- **Database**: MySQL/MariaDB with persistent storage
-
-### Files Structure
-```
+```text
 isitdoneyet/
-├── index.html          # Main HTML file
-├── app.js              # Application logic
-├── api-service.js      # API communication layer
-├── style.css           # Styling
-└── backend/            # PHP backend application
-    ├── public/         # Web-accessible files
-    ├── src/            # Application source code
-    └── vendor/         # Composer dependencies
+├── frontend/               # React, TypeScript, Vite, Zustand, Axios
+├── backend/
+│   ├── database/migrations # Ordered SQL migrations
+│   ├── public/             # PHP API entry point
+│   ├── scripts/            # Database initialization
+│   ├── src/
+│   │   ├── Actions/
+│   │   ├── Controllers/
+│   │   ├── Core/
+│   │   ├── Exceptions/
+│   │   ├── Models/
+│   │   ├── Repositories/
+│   │   ├── Services/
+│   │   └── Utils/
+│   └── tests/
+└── publish.ps1             # Delegates to the shared WebHatchery publish script
 ```
 
-### Key Components
+## Authentication
 
-- **API Service** (`api-service.js`): Handles all communication with the backend
-- **Application Logic** (`app.js`): Manages UI state, project hierarchy, and user interactions
-- **Responsive Design** (`style.css`): Modern CSS with CSS variables and responsive layout
+The backend uses shared WebHatchery Bearer tokens only. There are no local login endpoints and no server-side redirects. Unauthenticated API requests return `401` with `login_url`; the frontend stores that URL and lets the user choose whether to open WebHatchery Login.
 
-## 🔌 Backend Integration
+Project rows are scoped by `owner_id`, derived from the token `user_id` claim, then `sub`, then `id`.
 
-The frontend communicates with the backend API at `https://webhatchery.au/isitdoneyet/backend/public/api`.
+Agents should call `GET /api/v1/me` before creating or mutating work and compare `data.id` with the signed-in user shown in the UI. Agent work created with a different owner token is valid API data, but it will not be visible to that end user.
 
-### API Endpoints Used
+## Agent API
 
-- `GET /api/projects` - Load all projects
-- `POST /api/projects` - Create new project
-- `PUT /api/projects/{id}` - Update project
-- `DELETE /api/projects/{id}` - Delete project
-- `POST /api/projects/{id}/complete` - Mark project complete
-- `POST /api/projects/{id}/subtasks` - Add subtask
+The app exposes an agent-oriented loop on top of the project tree:
 
-## 🎯 Features
+- `POST /api/v1/agent/tokens` creates a short-lived user-delegated agent token.
+- `GET /api/v1/agent/projects/{id}/done-check` asks "Is it done yet?" and returns `answer`, `why_not`, and `next_tasks`.
+- `POST /api/v1/agent/projects/{id}/breakdown` records why a project is not done and creates the next subtasks.
+- `GET /api/v1/agent/projects/{id}/next-tasks` returns the lowest actionable incomplete nodes.
+- `POST /api/v1/agent/tasks/{id}/complete` marks an actionable node complete.
 
-- **Hierarchical Task Management**: Unlimited nesting of tasks and subtasks
-- **Progress Tracking**: Visual progress bars based on completed subtasks
-- **Completion Propagation**: Parent tasks auto-complete when all children are done
-- **Responsive Design**: Works on desktop and mobile devices
-- **Real-time Updates**: Changes are immediately saved to the backend
-- **Intuitive UI**: Modal-based task details with simple yes/no completion flow
+Agent tokens keep the same `user_id` as the signed-in user and add `actor_type: "agent"`, `agent_name`, and optional `assigned_project_id` claims. That lets an agent work in the user's visible project space instead of an isolated synthetic owner.
 
-## 🚀 Deployment
+`done-check` returns `yes` only after the selected project and every descendant are complete. Until then, agents should use `next_tasks` as the concrete work queue and `breakdown` whenever a task is still too large to finish directly.
 
-The application is currently deployed on Apache at webhatchery.au. For deployment details and configuration, see `APACHE-DEPLOYMENT.md` and `DEPLOYMENT.md`.
+When every known child task is complete but the parent itself is still open, the parent appears in `reassessment_questions`, not `next_tasks`. The agent must ask "is it done yet?" again for that parent; the answer may create another `breakdown`, or it may justify calling `POST /api/v1/agent/tasks/{id}/complete`.
 
-### Production Environment
-- **Server**: Apache with mod_rewrite enabled
-- **PHP**: Version 8.0+ with required extensions
-- **Database**: MySQL/MariaDB with proper schema
-- **SSL**: HTTPS enabled with valid certificate
+Completion is guarded: `POST /api/v1/agent/tasks/{id}/complete` and the standard project complete route reject a parent task with `400` while any child or descendant remains incomplete.
 
-## 🛠️ Development
+The UI consumes `done-check` for visible root projects and shows an Agent Status panel with the current answer, next action, open count, next tasks, or reassessment questions. Child tasks injected through the agent API are stored in the same project tree, so they appear in the normal end-user task list after refresh.
 
-### CORS Configuration
-CORS is configured for the webhatchery.au domain to allow secure API communication.
+The UI also includes Agent Access controls for creating a delegated agent token, or creating a new project and immediately assigning a token to it.
 
-### Error Handling
-- API errors are logged to the browser console
-- User-friendly error messages for network issues
-- Graceful fallback behavior for offline usage
+## Environment
 
-## 🎨 Customization
+Frontend:
 
-### Styling
-Edit `style.css` to customize the appearance. The design uses CSS custom properties for easy theming:
-
-```css
-:root {
-    --primary-color: #007bff;
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-    --danger-color: #dc3545;
-}
+```env
+VITE_API_BASE_URL=http://127.0.0.1/isitdoneyet/api/v1
+VITE_WEBHATCHERY_LOGIN_URL=https://webhatchery.au/login
 ```
 
-### API Configuration
-The application uses the production API at `https://webhatchery.au/isitdoneyet/backend/public/api`.
+Backend:
 
-To customize the API URL, update the base URL in `api-service.js`:
-
-```javascript
-constructor() {
-    this.baseURL = 'https://webhatchery.au/isitdoneyet/backend/public/api';
-}
+```env
+APP_ENV=development
+APP_BASE_PATH=/isitdoneyet
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=isitdoneyet
+DB_USER=isitdoneyet_user
+DB_PASSWORD=
+JWT_SECRET=replace_with_shared_webhatchery_jwt_secret
+WEBHATCHERY_LOGIN_URL=https://webhatchery.au/login
+CORS_ALLOWED_ORIGINS=http://127.0.0.1,http://localhost:5173,https://webhatchery.au
 ```
 
-## 📱 Browser Compatibility
+All backend env values are explicit. Wildcard CORS is rejected.
 
-- Modern browsers with ES6+ support
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+## Verification
 
-## 🐛 Troubleshooting
+```powershell
+cd frontend
+npm run lint
+npm run type-check
+npm run test:run
+npm run build
+npm audit --audit-level=moderate
 
-If you encounter issues with the application:
-- Check the browser console for errors
-- Verify your internet connection
-- Try clearing browser cache and cookies
-- Ensure webhatchery.au is accessible
-- Report persistent issues via the project repository
+cd ..\backend
+composer test
+composer cs-check
+```
 
-### Data Not Persisting
-- Data is automatically saved to the live database
-- Check browser console for API errors
-- Verify the backend API is responding correctly
+For normal local preview, run the app root publish script and inspect the shared preview URL:
 
-## 📄 License
+```powershell
+.\publish.ps1
+```
 
-MIT License - see backend README for full details.
+Preview: `http://127.0.0.1/isitdoneyet/`

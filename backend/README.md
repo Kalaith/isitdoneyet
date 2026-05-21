@@ -1,173 +1,111 @@
-# Is It Done Yet? - Backend
+# Is It Done Yet Backend
 
-A PHP backend for the "Is It Done Yet?" recursive project management application.
+PHP API for the Is It Done Yet recursive project tracker.
 
-## Features
+## Security Model
 
-- **RESTful API** for project management
-- **Hierarchical task structure** with unlimited nesting
-- **Automatic progress calculation** based on completed subtasks
-- **Completion propagation** - parent tasks auto-complete when all children are done
-- **Robust error handling** and logging
-- **CORS support** for frontend integration
+Projects are private, user-owned records. Every project route requires a shared WebHatchery Bearer token signed with the configured `JWT_SECRET`. Unauthenticated requests return HTTP 401 with `login_url`; the API does not provide local login endpoints or redirects.
 
-## API Endpoints
+Use `GET /api/v1/me` to confirm which owner id the current token maps to before an agent creates tracking work.
 
-### Projects
-- `GET /api/v1/projects` - Get all projects
-- `GET /api/v1/projects/{id}` - Get project by ID
-- `POST /api/v1/projects` - Create new project
-- `PUT /api/v1/projects/{id}` - Update project
-- `DELETE /api/v1/projects/{id}` - Delete project
-- `POST /api/v1/projects/{id}/complete` - Mark project complete
-- `POST /api/v1/projects/{id}/subtasks` - Add subtask to project
+Health and status routes are public and do not require database connectivity.
 
-Compatibility routes (still available):
+## Required Environment
 
-- `GET /api/projects`
-- `GET /api/projects/{id}`
-- `POST /api/projects`
-- `PUT /api/projects/{id}`
-- `DELETE /api/projects/{id}`
-- `POST /api/projects/{id}/complete`
-- `POST /api/projects/{id}/subtasks`
-
-### System
-- `GET /api/v1/health` - Versioned health endpoint
-- `GET /health` - Root health endpoint
-- `GET /api/v1/status` - Versioned status endpoint
-- `GET /api/status` - Legacy status endpoint
-
-## Quick Start
-
-1. **Install Dependencies**
-   ```bash
-   composer install --working-dir=../../..
-   ```
-
-2. **Environment Setup**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database settings
-   ```
-
-3. **Initialize Database**
-   ```bash
-   php scripts/initialize-database.php
-   ```
-
-4. **Start Server**
-   ```bash
-   composer start
-   # Server runs on http://localhost:3001
-   ```
-
-## Project Structure
-
-```
-backend/
-├── public/
-│   └── index.php           # Application entry point
-├── src/
-│   ├── Actions/
-│   │   └── ProjectActions.php     # Business logic
-│   ├── Controllers/
-│   │   └── ProjectController.php  # HTTP handlers
-│   ├── External/
-│   │   └── DatabaseService.php    # Database connection
-│   ├── Models/
-│   │   └── Project.php             # Eloquent model
-│   ├── Routes/
-│   │   └── api.php                 # API routes
-│   └── Utils/
-│       └── Logger.php              # Logging utility
-├── scripts/
-│   └── initialize-database.php    # Database setup
-├── storage/
-│   └── logs/                       # Application logs
-├── composer.json
-└── README.md
-```
-
-## Architecture
-
-The backend follows the **Actions Pattern** used in the Mytherra project:
-
-- **Controllers** handle HTTP requests/responses
-- **Actions** contain business logic and database operations
-- **Models** define data structure and relationships
-- **External** services handle third-party integrations
-- **Utils** provide common functionality
-
-## Database Schema
-
-### Projects Table
-```sql
-id              BIGINT AUTO_INCREMENT PRIMARY KEY
-title           VARCHAR(255) NOT NULL
-description     TEXT NULL
-completed       BOOLEAN DEFAULT FALSE
-parent_id       BIGINT NULL REFERENCES projects(id)
-created_at      TIMESTAMP
-updated_at      TIMESTAMP
-```
-
-## Frontend Integration
-
-Update your frontend's API base URL to point to the backend:
-
-```javascript
-// In your frontend app.js or config
-const API_BASE_URL = 'http://localhost:3001/api/v1';
-```
-
-## Development
-
-### Code Standards
-- Follows PSR-12 coding standards
-- Uses Actions pattern for business logic separation
-- Comprehensive error handling and logging
-- Type hints and proper documentation
-
-### Testing
-```bash
-composer test        # Run PHPUnit tests
-composer cs-check    # Check code standards
-composer cs-fix      # Fix code formatting
-```
-
-## Environment Variables
+Copy `.env.example` to the backend environment file used by publish or local development and set every required value explicitly:
 
 ```env
-# Application Configuration
 APP_ENV=development
 APP_BASE_PATH=/isitdoneyet
-
-# Database Configuration
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=isitdoneyet
-DB_USER=root
+DB_DATABASE=isitdoneyet
+DB_USER=isitdoneyet_user
 DB_PASSWORD=
-
-# Server Configuration
-PORT=3001
-DEBUG=true
-
-# CORS Configuration
-CORS_ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000"
-
-# API Configuration
-API_PREFIX=/api
-API_VERSION=v1
-
-# Security
-JWT_SECRET=replace_with_long_random_secret
-JWT_EXPIRY=86400
+JWT_SECRET=replace_with_shared_webhatchery_jwt_secret
+WEBHATCHERY_LOGIN_URL=https://webhatchery.au/login
+CORS_ALLOWED_ORIGINS=http://127.0.0.1,http://localhost:5173,https://webhatchery.au
 ```
 
-## Bootstrap Notes
+`CORS_ALLOWED_ORIGINS` must be an explicit comma-separated allow-list. Wildcard CORS is rejected at startup.
 
-- `public/index.php` supports both versioned (`/api/v1/*`) and legacy (`/api/*`) routes.
-- Health/status endpoints are intentionally lightweight and can respond without database connectivity.
-- Autoloading prefers the central WebHatchery `vendor` folder with a local fallback.
+## Database
+
+Migrations live in `backend/database/migrations/`.
+
+For an existing public `projects` table, run `001_add_project_ownership.sql`. Before running it, set `@legacy_owner_id` to the WebHatchery user id that should own existing rows:
+
+```sql
+SET @legacy_owner_id = 'webhatchery-user-id';
+SOURCE backend/database/migrations/001_add_project_ownership.sql;
+```
+
+For a new database:
+
+```powershell
+composer install --working-dir=../../..
+php scripts/initialize-database.php
+```
+
+Set `SEED_OWNER_ID` only if you want sample data created for a specific WebHatchery user.
+
+## API
+
+- `GET /api/v1/health`
+- `GET /api/v1/status`
+- `GET /api/v1/me`
+- `GET /api/v1/projects`
+- `GET /api/v1/projects/{id}`
+- `POST /api/v1/projects`
+- `PUT /api/v1/projects/{id}`
+- `DELETE /api/v1/projects/{id}`
+- `POST /api/v1/projects/{id}/complete`
+- `POST /api/v1/projects/{id}/subtasks`
+- `GET /api/v1/agent/projects/{id}/done-check`
+- `GET /api/v1/agent/projects/{id}/next-tasks`
+- `POST /api/v1/agent/projects/{id}/breakdown`
+- `POST /api/v1/agent/tasks/{id}/complete`
+- `POST /api/v1/agent/tokens`
+
+Legacy `/api/*` project routes are still accepted for deployed compatibility, but new clients should use `/api/v1/*`.
+
+Agent breakdown requests use the recursive "is it done yet?" loop:
+
+```json
+{
+  "reason": "The project is not complete because the API contract is missing.",
+  "tasks": [
+    {
+      "title": "Define agent response schema",
+      "description": "Document the deterministic JSON shape agents can consume."
+    }
+  ]
+}
+```
+
+The done-check response answers `yes` only when the selected project and every descendant are complete. `next_tasks` returns the lowest actionable incomplete leaf nodes so an agent can keep drilling down until work is concrete.
+
+If every known child task is complete but the parent is not, the parent is returned in `reassessment_questions`. That means the agent must ask the parent question again instead of marking it complete by checklist inertia. The reassessment can produce another `breakdown`, or it can justify `POST /api/v1/agent/tasks/{id}/complete` when the answer is genuinely yes.
+
+Completion routes reject a task with HTTP 400 while any child or descendant task is incomplete.
+
+The frontend displays agent state by calling `done-check` for visible root projects. Agent-created child tasks use the same project records as manual child tasks, so API-driven work is visible in the standard UI.
+
+Agent token requests use:
+
+```json
+{
+  "agent_name": "Codex",
+  "project_id": 123,
+  "expires_in_seconds": 86400
+}
+```
+
+`project_id` is optional. If present, it must belong to the signed-in user. The returned bearer token keeps the user's `user_id` and adds agent metadata claims.
+
+## Verification
+
+```powershell
+composer test
+composer cs-check
+```

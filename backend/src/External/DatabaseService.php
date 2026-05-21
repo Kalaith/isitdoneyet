@@ -1,55 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\External;
 
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Exception;
+use App\Core\Env;
+use PDO;
 
-class DatabaseService
+final class DatabaseService
 {
-    private static ?Capsule $capsule = null;
-    
-    public function __construct()
+    private static ?PDO $connection = null;
+
+    public function getConnection(): PDO
     {
-        if (self::$capsule === null) {
-            $this->initializeDatabase();
+        if (self::$connection === null) {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
+                Env::required('DB_HOST'),
+                Env::requiredInt('DB_PORT'),
+                Env::required('DB_DATABASE')
+            );
+
+            self::$connection = new PDO(
+                $dsn,
+                Env::required('DB_USER'),
+                Env::required('DB_PASSWORD', true),
+                [
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]
+            );
         }
+
+        return self::$connection;
     }
-    
-    private function initializeDatabase(): void
-    {
-        self::$capsule = new Capsule;
-        
-        self::$capsule->addConnection([
-            'driver' => 'mysql',
-            'host' => $_ENV['DB_HOST'] ?? 'localhost',
-            'database' => $_ENV['DB_NAME'] ?? 'isitdoneyet',
-            'username' => $_ENV['DB_USER'] ?? 'root',
-            'password' => $_ENV['DB_PASSWORD'] ?? '',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-        ]);
-        
-        self::$capsule->setAsGlobal();
-        self::$capsule->bootEloquent();
-    }
-    
-    public static function getConnection()
-    {
-        if (self::$capsule === null) {
-            new self();
-        }
-        return self::$capsule;
-    }
-    
+
     public function testConnection(): bool
     {
-        try {
-            self::$capsule->getConnection()->getPdo();
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
+        $this->getConnection()->query('SELECT 1');
+        return true;
     }
 }

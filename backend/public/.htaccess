@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Preserve Authorization for PHP on Apache/FastCGI.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Route API requests through the PHP front controller.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+AddType application/json .json

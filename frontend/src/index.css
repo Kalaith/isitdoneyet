@@ -21,7 +21,7 @@ body {
 
 .app-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 16px 40px rgba(16, 42, 67, 0.15);
   padding: 1.5rem;
 }
@@ -43,7 +43,9 @@ h1 {
 }
 
 input,
-button {
+button,
+select,
+textarea {
   border: 1px solid #bcccdc;
   border-radius: 8px;
   font: inherit;
@@ -65,6 +67,23 @@ button.danger {
   background: #b42318;
 }
 
+.auth-required {
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 0.9rem;
+}
+
+.auth-required p {
+  margin: 0 0 0.7rem;
+}
+
+.auth-required a {
+  color: #1f5eff;
+  font-weight: 700;
+}
+
 .error {
   color: #b42318;
   font-weight: 600;
@@ -84,9 +103,30 @@ button.danger {
   margin-bottom: 1rem;
 }
 
+.project-node.depth-1 {
+  margin-left: 1rem;
+}
+
+.project-node.depth-2 {
+  margin-left: 2rem;
+}
+
+.project-node.depth-3 {
+  margin-left: 3rem;
+}
+
+.project-node.depth-4 {
+  margin-left: 4rem;
+}
+
+.project-node.depth-5,
+.project-node.depth-6 {
+  margin-left: 5rem;
+}
+
 .project-card {
   border: 1px solid #d9e2ec;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0.8rem;
 }
 
@@ -125,6 +165,231 @@ button.danger {
   padding: 0.4rem 0.7rem;
 }
 
+.agent-status {
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  margin-top: 0.7rem;
+  padding: 0.7rem;
+}
+
+.agent-status-title {
+  color: #243b53;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.agent-status-summary {
+  align-items: center;
+  color: #334e68;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  gap: 0.45rem;
+}
+
+.agent-pill {
+  background: #334e68;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+}
+
+.agent-pill.action-done {
+  background: #2f855a;
+}
+
+.agent-pill.action-reassess {
+  background: #b7791f;
+}
+
+.agent-pill.action-breakdown {
+  background: #805ad5;
+}
+
+.agent-status-detail {
+  margin-top: 0.55rem;
+}
+
+.agent-status-detail > span {
+  color: #243b53;
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.agent-status-detail ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.agent-status-detail li {
+  margin: 0.25rem 0;
+}
+
+.agent-status-detail small {
+  color: #486581;
+  display: block;
+  margin-top: 0.1rem;
+}
+
+.agent-error {
+  color: #b42318;
+  font-size: 0.85rem;
+  margin: 0.45rem 0 0;
+}
+
+.agent-access {
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 0.9rem;
+}
+
+.agent-access-header {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+
+.agent-access-header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.agent-access-header span,
+.agent-token-result p {
+  color: #486581;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.agent-token-form {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.agent-token-result {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.agent-token-result textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.tree-map {
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  margin-top: 0.7rem;
+  padding: 0.7rem;
+}
+
+.tree-map-header {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+
+.tree-map-header h4 {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.tree-map-header span {
+  color: #486581;
+  font-size: 0.8rem;
+}
+
+.tree-map-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.tree-root,
+.tree-root ul {
+  display: flex;
+  gap: 0.7rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree-root {
+  min-width: max-content;
+}
+
+.tree-root li {
+  align-items: center;
+  display: flex;
+  gap: 0.7rem;
+  position: relative;
+}
+
+.tree-root li::after {
+  background: #bcccdc;
+  content: "";
+  height: 2px;
+  left: 100%;
+  position: absolute;
+  top: 50%;
+  width: 0.7rem;
+}
+
+.tree-root li.has-children::after {
+  display: block;
+}
+
+.tree-root li:not(.has-children)::after {
+  display: none;
+}
+
+.tree-root ul {
+  border-left: 2px solid #bcccdc;
+  flex-direction: column;
+  padding-left: 0.7rem;
+}
+
+.tree-node {
+  background: #fff;
+  border: 1px solid #bcccdc;
+  border-radius: 8px;
+  color: #102a43;
+  display: grid;
+  gap: 0.2rem;
+  min-width: 11rem;
+  padding: 0.55rem 0.65rem;
+}
+
+.tree-node.is-complete {
+  background: #e3f9e5;
+  border-color: #57ae5b;
+}
+
+.tree-node span {
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.tree-node small {
+  color: #486581;
+  font-size: 0.78rem;
+}
+
 .subtask-form {
   display: grid;
   gap: 0.45rem;
@@ -133,4 +398,25 @@ button.danger {
 
 .children {
   margin-top: 0.7rem;
+}
+
+@media (max-width: 640px) {
+  .project-node.depth-3,
+  .project-node.depth-4,
+  .project-node.depth-5,
+  .project-node.depth-6 {
+    margin-left: 2rem;
+  }
+
+  .tree-root,
+  .tree-root ul,
+  .tree-root li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tree-root li::after,
+  .tree-root ul {
+    border-left: 0;
+  }
 }

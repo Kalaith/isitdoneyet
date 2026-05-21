@@ -1,211 +1,176 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Actions\ProjectActions;
 use App\Utils\Logger;
 use Exception;
+use InvalidArgumentException;
 
 class ProjectController
 {
-    private ProjectActions $projectActions;
-    private Logger $logger;
-    
-    public function __construct(ProjectActions $projectActions, Logger $logger)
-    {
-        $this->projectActions = $projectActions;
-        $this->logger = $logger;
-    }    
+    public function __construct(
+        private readonly ProjectActions $projectActions,
+        private readonly Logger $logger
+    ) {
+    }
+
     /**
-     * Get all projects
+     * @return array{status: int, body: array<string, mixed>}
      */
-    public function getAllProjects(): array
+    public function getAllProjects(string $ownerId): array
+    {
+        return $this->handle(
+            fn (): array => $this->ok($this->projectActions->getAllProjects($ownerId)),
+            'Failed to fetch projects'
+        );
+    }
+
+    /**
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    public function getProjectById(string $ownerId, int $id): array
+    {
+        return $this->handle(function () use ($ownerId, $id): array {
+            $project = $this->projectActions->getProjectById($ownerId, $id);
+
+            if (!$project) {
+                return $this->error('Project not found', 404);
+            }
+
+            return $this->ok($project);
+        }, 'Failed to fetch project');
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    public function createProject(string $ownerId, array $data): array
+    {
+        return $this->handle(
+            fn (): array => $this->ok($this->projectActions->createProject($ownerId, $data), 201),
+            'Failed to create project'
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    public function updateProject(string $ownerId, int $id, array $data): array
+    {
+        return $this->handle(function () use ($ownerId, $id, $data): array {
+            $project = $this->projectActions->updateProject($ownerId, $id, $data);
+
+            if (!$project) {
+                return $this->error('Project not found', 404);
+            }
+
+            return $this->ok($project);
+        }, 'Failed to update project');
+    }
+
+    /**
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    public function markProjectComplete(string $ownerId, int $id): array
+    {
+        return $this->handle(function () use ($ownerId, $id): array {
+            $project = $this->projectActions->markProjectComplete($ownerId, $id);
+
+            if (!$project) {
+                return $this->error('Project not found', 404);
+            }
+
+            return $this->ok(['completed_projects' => [$project]]);
+        }, 'Failed to mark project complete');
+    }
+
+    /**
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    public function deleteProject(string $ownerId, int $id): array
+    {
+        return $this->handle(function () use ($ownerId, $id): array {
+            $deleted = $this->projectActions->deleteProject($ownerId, $id);
+
+            if (!$deleted) {
+                return $this->error('Project not found', 404);
+            }
+
+            return $this->ok(null, 200, 'Project deleted successfully');
+        }, 'Failed to delete project');
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    public function addSubtask(string $ownerId, int $parentId, array $data): array
+    {
+        return $this->handle(function () use ($ownerId, $parentId, $data): array {
+            $subtask = $this->projectActions->addSubtask($ownerId, $parentId, $data);
+
+            if (!$subtask) {
+                return $this->error('Parent project not found', 404);
+            }
+
+            return $this->ok($subtask, 201);
+        }, 'Failed to add subtask');
+    }
+
+    /**
+     * @param callable(): array{status: int, body: array<string, mixed>} $operation
+     * @return array{status: int, body: array<string, mixed>}
+     */
+    private function handle(callable $operation, string $failureMessage): array
     {
         try {
-            $projects = $this->projectActions->getAllProjects();
-            return [
-                'success' => true,
-                'data' => $projects
-            ];
+            return $operation();
+        } catch (InvalidArgumentException $exception) {
+            return $this->error($exception->getMessage(), 400);
         } catch (Exception $e) {
-            $this->logger->error('Failed to fetch projects: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch projects: ' . $e->getMessage()
-            ];
+            $this->logger->error($failureMessage . ': ' . $e->getMessage());
+            return $this->error($failureMessage, 500);
         }
     }
 
     /**
-     * Get project by ID
+     * @param mixed $data
+     * @return array{status: int, body: array<string, mixed>}
      */
-    public function getProjectById(int $id): array
+    private function ok(mixed $data, int $status = 200, ?string $message = null): array
     {
-        try {
-            $project = $this->projectActions->getProjectById($id);
-            
-            if (!$project) {
-                return [
-                    'success' => false,
-                    'message' => 'Project not found'
-                ];
-            }
-            
-            return [
-                'success' => true,
-                'data' => $project
-            ];
-            
-        } catch (Exception $e) {
-            $this->logger->error('Failed to fetch project: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to fetch project: ' . $e->getMessage()
-            ];
+        $body = ['success' => true];
+
+        if ($data !== null) {
+            $body['data'] = $data;
         }
+
+        if ($message !== null) {
+            $body['message'] = $message;
+        }
+
+        return [
+            'status' => $status,
+            'body' => $body,
+        ];
     }
-    
+
     /**
-     * Create a new project
+     * @return array{status: int, body: array<string, mixed>}
      */
-    public function createProject(array $data): array
+    private function error(string $message, int $status): array
     {
-        try {
-            if (!isset($data['title']) || empty(trim($data['title']))) {
-                return [
-                    'success' => false,
-                    'message' => 'Title is required'
-                ];
-            }
-            
-            $project = $this->projectActions->createProject($data);
-            
-            return [
-                'success' => true,
-                'data' => $project
-            ];
-            
-        } catch (Exception $e) {
-            $this->logger->error('Failed to create project: ' . $e->getMessage());
-            return [
+        return [
+            'status' => $status,
+            'body' => [
                 'success' => false,
-                'message' => 'Failed to create project: ' . $e->getMessage()
-            ];
-        }
-    }
-    
-    /**
-     * Update a project
-     */
-    public function updateProject(int $id, array $data): array
-    {
-        try {
-            $project = $this->projectActions->updateProject($id, $data);
-            
-            if (!$project) {
-                return [
-                    'success' => false,
-                    'message' => 'Project not found'
-                ];
-            }
-            
-            return [
-                'success' => true,
-                'data' => $project
-            ];
-            
-        } catch (Exception $e) {
-            $this->logger->error('Failed to update project: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to update project: ' . $e->getMessage()
-            ];
-        }
-    }
-    
-    /**
-     * Mark project as complete
-     */
-    public function markProjectComplete(int $id): array
-    {
-        try {
-            $result = $this->projectActions->markProjectComplete($id);
-            
-            return [
-                'success' => true,
-                'data' => $result
-            ];
-            
-        } catch (Exception $e) {
-            $this->logger->error('Failed to mark project complete: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to mark project complete: ' . $e->getMessage()
-            ];
-        }
-    }
-    
-    /**
-     * Delete a project
-     */
-    public function deleteProject(int $id): array
-    {
-        try {
-            $deleted = $this->projectActions->deleteProject($id);
-            
-            if (!$deleted) {
-                return [
-                    'success' => false,
-                    'message' => 'Project not found'
-                ];
-            }
-            
-            return [
-                'success' => true,
-                'message' => 'Project deleted successfully'
-            ];
-            
-        } catch (Exception $e) {
-            $this->logger->error('Failed to delete project: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to delete project: ' . $e->getMessage()
-            ];
-        }
-    }
-    
-    /**
-     * Add subtask to a project
-     */
-    public function addSubtask(int $parentId, array $data): array
-    {
-        try {
-            if (!isset($data['title']) || empty(trim($data['title']))) {
-                return [
-                    'success' => false,
-                    'message' => 'Title is required'
-                ];
-            }
-            
-            $subtask = $this->projectActions->addSubtask($parentId, $data);
-            
-            if (!$subtask) {
-                return [
-                    'success' => false,
-                    'message' => 'Parent project not found'
-                ];
-            }
-            
-            return [
-                'success' => true,            'data' => $subtask
-            ];
-            
-        } catch (Exception $e) {
-            $this->logger->error('Failed to add subtask: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Failed to add subtask: ' . $e->getMessage()
-            ];
-        }
+                'message' => $message,
+            ],
+        ];
     }
 }
